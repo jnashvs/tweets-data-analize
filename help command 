@@ -3,6 +3,8 @@ source bin/activate
 ## run command to inicialize flask my_app:
 flask run
 
+## dont forget to: docker up --imagename
+
 ## pacote usado
 https://pypi.org/project/google-trans-new/
 
@@ -12,3 +14,6 @@ https://www.w3schools.com/python/pandas/pandas_analyzing.asp
 ## how to install flask project
 
 https://medium.com/code-85/easily-build-your-first-web-app-with-pythons-flask-d12825f9f1d9
+
+# conect with MSSQL
+https://docs.microsoft.com/en-us/sql/connect/python/pymssql/step-3-proof-of-concept-connecting-to-sql-using-pymssql?view=sql-server-ver15
