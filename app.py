@@ -1,12 +1,13 @@
 from flask import Flask, request
 from markupsafe import escape
 from flask import render_template
+import pymssql 
 
 #import google translator
 from google_trans_new import google_translator
 
 #panda csv files
-import numpy as np
+#import numpy as np
 import pandas as pd
 
 
@@ -14,11 +15,26 @@ import pandas as pd
 url = "https://google-translate1.p.rapidapi.com/language/translate/v2"
 
 app = Flask(__name__)
-#instancia ts
-
-@app.route("/")
+#conect MSSQL
+ 
+@app.route('/', methods=['GET', 'POST'])
 def home():
-  return "home page"
+  conn = pymssql.connect(server='localhost', user='sa', password='myPassw0rd', database='tweets')
+  cursor = conn.cursor()
+  #cursor.execute("SELECT * FROM posts")  
+  cursor.execute("INSERT INTO Posts (title, created_at) VALUES ('Jorge tyls spend momeny','2023-03-03')")
+  
+  # make sure data inserted
+  row = conn.commit()
+
+  cursor.execute("SELECT * FROM posts")  
+
+  #row = cursor.fetchone() 
+  row = cursor.fetchall()
+  
+  conn.close()
+
+  return render_template('home.html', row=row)
 
 @app.route('/hello/<name>')
 def hello(name=None):

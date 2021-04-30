@@ -1,0 +1,14 @@
+## always run (enter in my_app): 
+source bin/activate
+## run command to inicialize flask my_app:
+flask run
+
+## pacote usado
+https://pypi.org/project/google-trans-new/
+
+## panda 
+https://www.w3schools.com/python/pandas/pandas_analyzing.asp
+
+## how to install flask project
+
+https://medium.com/code-85/easily-build-your-first-web-app-with-pythons-flask-d12825f9f1d9
