@@ -16,16 +16,16 @@ url = "https://google-translate1.p.rapidapi.com/language/translate/v2"
 
 app = Flask(__name__)
 #conect MSSQL
+conn = pymssql.connect(server='localhost', user='sa', password='myPassw0rd', database='tweets')
+cursor = conn.cursor()
  
 @app.route('/', methods=['GET', 'POST'])
 def home():
-  conn = pymssql.connect(server='localhost', user='sa', password='myPassw0rd', database='tweets')
-  cursor = conn.cursor()
-  #cursor.execute("SELECT * FROM posts")  
-  cursor.execute("INSERT INTO Posts (title, created_at) VALUES ('Jorge tyls spend momeny','2023-03-03')")
+  
+  #cursor.execute("INSERT INTO Posts (title, created_at) VALUES ('Jorge tyls spend momeny','2023-03-03')")
   
   # make sure data inserted
-  row = conn.commit()
+  #row = conn.commit()
 
   cursor.execute("SELECT * FROM posts")  
 
@@ -51,8 +51,9 @@ def html_table():
   file = 'tweets.csv'
   df = pd.read_csv(file)
 
-  df = df.head(10)
+  df = df.head(15)
 
+  #limitar linhas e colunas [0:n -> linhas, [colunas]]
   #df = df.loc[:10, ['author', 'content']]
 
   df2 = pd.DataFrame(columns=('author', 'content'))
@@ -63,6 +64,10 @@ def html_table():
   for index, row in df.iterrows():
     translate_text = translator.translate(escape(row['content']),lang_tgt='pt')
     df2.loc[index] = [row['author'], translate_text]
+    cursor.execute(f"INSERT INTO Posts (title, created_at) VALUES ('{translate_text}','2023-03-03')")
+    row = conn.commit()
+  
+  conn.close()
 
   #return df.to_html(header="true", table_id="table")
   return render_template('panda.html',  tables=[df2.to_html(classes='data')], titles=df2.columns.values)
