@@ -10,10 +10,6 @@ from google_trans_new import google_translator
 #import numpy as np
 import pandas as pd
 
-
-## google translator atributes
-url = "https://google-translate1.p.rapidapi.com/language/translate/v2"
-
 app = Flask(__name__)
 #conect MSSQL
 conn = pymssql.connect(server='localhost', user='sa', password='myPassw0rd', database='tweets')
@@ -27,10 +23,17 @@ def home():
   # make sure data inserted
   #row = conn.commit()
 
+  # cursor.executemany(
+  #   "INSERT INTO Posts (original_content, trans_content) VALUES (%s, %s)",
+  #   [('John Smith', 'John Doe'),
+  #    ('Jane Doe', 'Joe Dog'),
+  #    ('Mike T.', 'Sarah H.')])
+  # conn.commit()
+
   cursor.execute("SELECT * FROM posts")  
 
-  #row = cursor.fetchone() 
-  row = cursor.fetchall()
+  row = cursor.fetchone() 
+  #row = cursor.fetchall()
   
   conn.close()
 
@@ -48,25 +51,33 @@ def show_user_profile(username):
 ## import panda
 @app.route('/panda', methods=("POST", "GET"))
 def html_table():
-  file = 'tweets.csv'
-  df = pd.read_csv(file)
+  df = pd.read_csv("multi_langues_dataset_10500.tsv", sep='\t')
 
-  df = df.head(15)
+  df = df.head(5)
 
   #limitar linhas e colunas [0:n -> linhas, [colunas]]
-  #df = df.loc[:10, ['author', 'content']]
+  #df = df.loc[:10, 2:3]
 
-  df2 = pd.DataFrame(columns=('author', 'content'))
+  dados = []
+
+  df2 = pd.DataFrame(columns=('Date', 'Tweet'))
 
   # google translator
   translator = google_translator()
 
   for index, row in df.iterrows():
-    translate_text = translator.translate(escape(row['content']),lang_tgt='pt')
-    df2.loc[index] = [row['author'], translate_text]
-    cursor.execute(f"INSERT INTO Posts (title, created_at) VALUES ('{translate_text}','2023-03-03')")
-    row = conn.commit()
-  
+    translate_text = translator.translate(escape(row['Tweet']),lang_tgt='en')
+    detect_src = translator.detect(row['Tweet'])
+    detect_dest = translator.detect(translate_text)
+    df2.loc[index] = [row['Tweet'], translate_text]
+    dados.append((row['Tweet'],translate_text,detect_src[1], detect_dest[1], row['Tweet ID'], row['Date']))
+
+    #cursor.execute(f"INSERT INTO Posts (original_content, trans_content, src, twitter_id, created_at) VALUES ('{row['Tweet']}',{translate_text}', '{detect_result}', '{row['Tweet ID']}', '{row['Date']}')")
+    #row = conn.commit()
+  cursor.executemany(
+    "INSERT INTO Posts (original_content, trans_content, src, dest, tweeter_id, created_at) VALUES (%s, %s, %s, %s, %s, %s)", dados)
+
+  conn.commit()
   conn.close()
 
   #return df.to_html(header="true", table_id="table")
